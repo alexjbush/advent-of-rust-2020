@@ -1,5 +1,5 @@
 use regex::Regex;
-
+//TODO: Fix recompiling regex
 pub fn run() {
     let input: Vec<Document> = input_to_documents(INPUT);
     let res1 = input.iter().filter(|d| d.is_passport(false)).count();

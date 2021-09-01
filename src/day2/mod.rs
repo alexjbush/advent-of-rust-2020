@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use regex::Regex;
 
 pub fn run() {
@@ -44,8 +45,10 @@ impl PasswordAndPolicy {
         }
     }
     fn from_string(input: &String) -> PasswordAndPolicy {
-        let re = Regex::new(r"^(\d+)-(\d+) (\w): (\w+)").unwrap();
-        let caps = re.captures(input).unwrap();
+        lazy_static! {
+            static ref REGEX: Regex = Regex::new(r"^(\d+)-(\d+) (\w): (\w+)").unwrap();
+        }
+        let caps = REGEX.captures(input).unwrap();
         PasswordAndPolicy {
             min: caps.get(1).unwrap().as_str().parse::<usize>().unwrap(),
             max: caps.get(2).unwrap().as_str().parse::<usize>().unwrap(),
