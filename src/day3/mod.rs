@@ -1,16 +1,36 @@
-pub fn run() {
-    let input: Vec<&str> = INPUT.lines().collect();
-    let grid = Grid::parse(&input);
-    let res1 = grid.run_grid_and_count_trees(&Movement { right: 3, down: 1 });
-    println!("Answer (part 1): {}", res1);
+use crate::Day;
 
+pub struct Day3 {}
+
+impl<'a> Day<'a> for Day3 {
+    fn get_tasks(&self) -> Vec<(usize, &dyn Fn() -> String)> {
+        vec![(1, &|| task1()), (2, &|| task2())]
+    }
+
+    fn get_day_number(&self) -> usize {
+        2
+    }
+}
+
+fn get_grid() -> Grid {
+    let input: Vec<&str> = INPUT.lines().collect();
+    Grid::parse(&input)
+}
+
+fn task1() -> String {
+    get_grid()
+        .run_grid_and_count_trees(&Movement { right: 3, down: 1 })
+        .to_string()
+}
+
+fn task2() -> String {
     let part2_movements = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
     let res2: usize = part2_movements
         .iter()
         .map(|i| Movement::from_tuple(i))
-        .map(|m| grid.run_grid_and_count_trees(&m))
+        .map(|m| get_grid().run_grid_and_count_trees(&m))
         .product();
-    println!("Answer (part 2): {}", res2);
+    res2.to_string()
 }
 
 struct Position {

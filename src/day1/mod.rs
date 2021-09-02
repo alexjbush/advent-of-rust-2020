@@ -1,20 +1,30 @@
 use std::iter;
 
-pub fn run() {
-    let input: Vec<u32> = INPUT
+use crate::Day;
+
+pub struct Day1 {}
+
+impl<'a> Day<'a> for Day1 {
+    fn get_tasks(&self) -> Vec<(usize, &dyn Fn() -> String)> {
+        vec![(1, &|| task(2)), (2, &|| task(3))]
+    }
+
+    fn get_day_number(&self) -> usize {
+        1
+    }
+}
+
+fn task(elems: usize) -> String {
+    find_first_to_sum(&get_input(), 2020, elems)
+        .unwrap()
+        .to_string()
+}
+
+fn get_input() -> Vec<u32> {
+    INPUT
         .split_whitespace()
         .map(|s| s.parse::<u32>().unwrap())
-        .collect();
-    let res1 = find_first_to_sum(&input, 2020, 2);
-    match res1 {
-        Some(r) => println!("Answer (part 1): {}", r),
-        None => println!("Did not find an answer"),
-    }
-    let res2 = find_first_to_sum(&input, 2020, 3);
-    match res2 {
-        Some(r) => println!("Answer (part 2): {}", r),
-        None => println!("Did not find an answer"),
-    }
+        .collect()
 }
 
 fn find_first_to_sum(input: &Vec<u32>, target: u32, num_elems: usize) -> Option<u64> {

@@ -1,21 +1,36 @@
 use lazy_static::lazy_static;
 use regex::Regex;
 
-pub fn run() {
-    let input: Vec<PasswordAndPolicy> = INPUT
+use crate::Day;
+
+pub struct Day2 {}
+
+impl<'a> Day<'a> for Day2 {
+    fn get_tasks(&self) -> Vec<(usize, &dyn Fn() -> String)> {
+        vec![
+            (1, &|| task(PolicyType::Part1)),
+            (2, &|| task(PolicyType::Part2)),
+        ]
+    }
+
+    fn get_day_number(&self) -> usize {
+        2
+    }
+}
+
+fn task(policy: PolicyType) -> String {
+    get_input()
+        .iter()
+        .filter(|p| p.is_valid(&policy))
+        .count()
+        .to_string()
+}
+
+fn get_input() -> Vec<PasswordAndPolicy> {
+    INPUT
         .lines()
         .map(|s| PasswordAndPolicy::from_string(&s.to_string()))
-        .collect();
-    let res1 = input
-        .iter()
-        .filter(|p| p.is_valid(&PolicyType::Part1))
-        .count();
-    println!("Answer (part 1): {}", res1);
-    let res2 = input
-        .iter()
-        .filter(|p| p.is_valid(&PolicyType::Part2))
-        .count();
-    println!("Answer (part 2): {}", res2);
+        .collect()
 }
 
 #[derive(Debug, PartialEq)]

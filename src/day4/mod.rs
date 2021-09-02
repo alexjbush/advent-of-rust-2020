@@ -1,11 +1,29 @@
 use regex::Regex;
-//TODO: Fix recompiling regex
-pub fn run() {
-    let input: Vec<Document> = input_to_documents(INPUT);
-    let res1 = input.iter().filter(|d| d.is_passport(false)).count();
-    println!("Answer (part 1): {}", res1);
-    let res2 = input.iter().filter(|d| d.is_passport(true)).count();
-    println!("Answer (part 2): {}", res2);
+
+use crate::Day;
+
+pub struct Day4 {}
+
+impl<'a> Day<'a> for Day4 {
+    fn get_tasks(&self) -> Vec<(usize, &dyn Fn() -> String)> {
+        vec![(1, &|| task(false)), (2, &|| task(true))]
+    }
+
+    fn get_day_number(&self) -> usize {
+        4
+    }
+}
+
+fn task(strict: bool) -> String {
+    get_input()
+        .iter()
+        .filter(|d| d.is_passport(strict))
+        .count()
+        .to_string()
+}
+
+fn get_input() -> Vec<Document> {
+    input_to_documents(INPUT)
 }
 
 const INPUT: &str = include_str!("input.txt");
