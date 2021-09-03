@@ -30,36 +30,33 @@ fn get_input() -> Vec<u32> {
 fn find_first_to_sum(input: &Vec<u32>, target: u32, num_elems: usize) -> Option<u64> {
     let super_input: Vec<&Vec<u32>> = iter::repeat(input).take(num_elems).collect();
     fn inner_loop(
-        mut acc_input: Vec<&Vec<u32>>,
+        acc_input: &[&Vec<u32>],
         sum_acc: u32,
         prod_acc: u64,
         target: u32,
     ) -> Option<u64> {
-        match acc_input.pop() {
-            None => {
-                if sum_acc == target {
-                    Some(prod_acc)
-                } else {
-                    None
+        if acc_input.is_empty() {
+            if sum_acc == target {
+                Some(prod_acc)
+            } else {
+                None
+            }
+        } else {
+            for i in acc_input[0] {
+                if let Some(u) = (inner_loop)(
+                    &acc_input[1..],
+                    sum_acc + i,
+                    prod_acc * u64::from(*i),
+                    target,
+                ) {
+                    return Some(u);
                 }
             }
-            Some(i_input) => {
-                for i in i_input {
-                    if let Some(u) = (inner_loop)(
-                        acc_input.clone(),
-                        sum_acc + i,
-                        prod_acc * u64::from(*i),
-                        target,
-                    ) {
-                        return Some(u);
-                    }
-                }
-                return None;
-            }
+            return None;
         }
     }
 
-    return inner_loop(super_input, 0, 1, target);
+    return inner_loop(&super_input[..], 0, 1, target);
 }
 
 const INPUT: &str = include_str!("input.txt");
