@@ -8,7 +8,7 @@ impl<'a> Day<'a> for Day3 {
     }
 
     fn get_day_number(&self) -> usize {
-        2
+        3
     }
 }
 
