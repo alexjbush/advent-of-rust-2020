@@ -15,9 +15,10 @@ impl<'a> Day<'a> for Day4 {
 }
 
 fn task(strict: bool) -> String {
+    let passport = get_passport();
     get_input()
         .iter()
-        .filter(|d| d.is_passport(strict))
+        .filter(|d| d.is_passport(&passport, strict))
         .count()
         .to_string()
 }
@@ -46,11 +47,11 @@ struct Document {
     fields: Vec<String>,
 }
 
-struct DocumentType<'a> {
-    required_fields: &'a [&'a DocumentField<'a>],
+struct DocumentType {
+    required_fields: Vec<DocumentField>,
 }
 
-impl<'a> DocumentField<'a> {
+impl<'a> DocumentField {
     fn is_valid(&self, doc: &str, strict: bool) -> bool {
         if !doc.contains(&format!("{}:", self.id)) {
             return false;
@@ -60,57 +61,58 @@ impl<'a> DocumentField<'a> {
     }
 
     fn valid_by_rule(&self, doc: &str) -> bool {
-        let re = Regex::new(&self.pattern).unwrap();
-        re.is_match(doc)
+        self.pattern.is_match(doc)
     }
 }
 
-struct DocumentField<'a> {
-    id: &'a str,
-    pattern: &'a str,
+struct DocumentField {
+    id: String,
+    pattern: Regex,
 }
-const BIRTH_YEAR: DocumentField = DocumentField {
-    id: "byr",
-    pattern: r"^byr:(19[2-9][0-9]|200[0-2])$",
-};
-const ISSUE_YEAR: DocumentField = DocumentField {
-    id: "iyr",
-    pattern: r"^iyr:(201[0-9]|2020)$",
-};
-const EXPIRATION_DATE: DocumentField = DocumentField {
-    id: "eyr",
-    pattern: r"^eyr:(202[0-9]|2030)$",
-};
-const HEIGHT: DocumentField = DocumentField {
-    id: "hgt",
-    pattern: r"^hgt:(1[5-8][0-9]cm|19[0-3]cm|59in|6[0-9]in|7[0-6]in)$",
-};
-const HAIR_COLOUR: DocumentField = DocumentField {
-    id: "hcl",
-    pattern: r"^hcl:#[0-9a-f]{6}$",
-};
-const EYE_COLOUR: DocumentField = DocumentField {
-    id: "ecl",
-    pattern: r"^ecl:(amb|blu|brn|gry|grn|hzl|oth)$",
-};
-const PASSPORT_ID: DocumentField = DocumentField {
-    id: "pid",
-    pattern: r"^pid:\d{9}$",
-};
 
-const PASSPORT: DocumentType = DocumentType {
-    required_fields: &[
-        &BIRTH_YEAR,
-        &ISSUE_YEAR,
-        &EXPIRATION_DATE,
-        &HEIGHT,
-        &HAIR_COLOUR,
-        &EYE_COLOUR,
-        &PASSPORT_ID,
-    ],
-};
+fn get_passport() -> DocumentType {
+    let birth_year: DocumentField = DocumentField {
+        id: "byr".to_string(),
+        pattern: Regex::new(r"^byr:(19[2-9][0-9]|200[0-2])$").unwrap(),
+    };
+    let issue_year: DocumentField = DocumentField {
+        id: "iyr".to_string(),
+        pattern: Regex::new(r"^iyr:(201[0-9]|2020)$").unwrap(),
+    };
+    let expiration_date: DocumentField = DocumentField {
+        id: "eyr".to_string(),
+        pattern: Regex::new(r"^eyr:(202[0-9]|2030)$").unwrap(),
+    };
+    let height: DocumentField = DocumentField {
+        id: "hgt".to_string(),
+        pattern: Regex::new(r"^hgt:(1[5-8][0-9]cm|19[0-3]cm|59in|6[0-9]in|7[0-6]in)$").unwrap(),
+    };
+    let hair_colour: DocumentField = DocumentField {
+        id: "hcl".to_string(),
+        pattern: Regex::new(r"^hcl:#[0-9a-f]{6}$").unwrap(),
+    };
+    let eye_colour: DocumentField = DocumentField {
+        id: "ecl".to_string(),
+        pattern: Regex::new(r"^ecl:(amb|blu|brn|gry|grn|hzl|oth)$").unwrap(),
+    };
+    let passport_id: DocumentField = DocumentField {
+        id: "pid".to_string(),
+        pattern: Regex::new(r"^pid:\d{9}$").unwrap(),
+    };
+    DocumentType {
+        required_fields: vec![
+            birth_year,
+            issue_year,
+            expiration_date,
+            height,
+            hair_colour,
+            eye_colour,
+            passport_id,
+        ],
+    }
+}
 
-impl<'a> DocumentType<'a> {
+impl DocumentType {
     fn document_is_valid_type(&self, doc: &Document, strict: bool) -> bool {
         self.required_fields
             .iter()
@@ -119,14 +121,14 @@ impl<'a> DocumentType<'a> {
 }
 
 impl Document {
-    fn is_passport(&self, strict: bool) -> bool {
-        PASSPORT.document_is_valid_type(self, strict)
+    fn is_passport(&self, doc_type: &DocumentType, strict: bool) -> bool {
+        doc_type.document_is_valid_type(self, strict)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::day4::{input_to_documents, Document};
+    use crate::day4::{get_passport, input_to_documents, Document};
 
     const TESTINPUT1: &str = "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
 byr:1937 iyr:2017 cid:147 hgt:183cm
@@ -172,21 +174,30 @@ iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719";
     #[test]
     fn test_case_1() {
         let input: Vec<Document> = input_to_documents(TESTINPUT1);
-        let count = input.iter().filter(|d| d.is_passport(false)).count();
+        let count = input
+            .iter()
+            .filter(|d| d.is_passport(&get_passport(), false))
+            .count();
         assert_eq!(count, 2);
     }
 
     #[test]
     fn test_case_2() {
         let input: Vec<Document> = input_to_documents(TESTINPUT2);
-        let count = input.iter().filter(|d| d.is_passport(true)).count();
+        let count = input
+            .iter()
+            .filter(|d| d.is_passport(&get_passport(), true))
+            .count();
         assert_eq!(count, 0);
     }
 
     #[test]
     fn test_case_3() {
         let input: Vec<Document> = input_to_documents(TESTINPUT3);
-        let count = input.iter().filter(|d| d.is_passport(true)).count();
+        let count = input
+            .iter()
+            .filter(|d| d.is_passport(&get_passport(), true))
+            .count();
         assert_eq!(count, 4);
     }
 }
