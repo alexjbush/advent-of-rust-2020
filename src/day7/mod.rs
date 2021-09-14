@@ -8,7 +8,7 @@ pub struct Day7 {}
 
 impl<'a> Day<'a> for Day7 {
     fn get_tasks(&self) -> Vec<(usize, &dyn Fn() -> String)> {
-        vec![(1, &task1)]
+        vec![(1, &task1), (2, &task2)]
     }
 
     fn get_day_number(&self) -> usize {
@@ -26,6 +26,16 @@ fn task1() -> String {
         .to_string()
 }
 
+fn task2() -> String {
+    let parsed = parse_input(INPUT.lines());
+    let mut memo = HashMap::new();
+    parsed
+        .get("shiny gold")
+        .unwrap()
+        .contains(&parsed, &mut memo)
+        .to_string()
+}
+
 struct Bag {
     color: String,
     contains: HashMap<String, u32>,
@@ -35,7 +45,7 @@ impl Bag {
     fn parse(input: &str) -> Bag {
         lazy_static! {
             static ref THIS_BAG_RE: Regex = Regex::new(r"^([a-z]+ [a-z]+)").unwrap();
-            static ref CONTAINS_BAGS_RE: Regex = Regex::new(r"(\d) ([a-z]+ [a-z]+)").unwrap();
+            static ref CONTAINS_BAGS_RE: Regex = Regex::new(r"(\d+) ([a-z]+ [a-z]+)").unwrap();
         }
         let this_bag = THIS_BAG_RE
             .captures(input)
@@ -75,6 +85,22 @@ impl Bag {
                 }
         })
     }
+
+    fn contains(&self, rules: &HashMap<String, Bag>, memo: &mut HashMap<String, u32>) -> u32 {
+        self.contains
+            .iter()
+            .map(|(b, c)| {
+                c + c * match memo.get(b) {
+                    Some(cnt) => *cnt,
+                    None => {
+                        let cnt = rules.get(b).unwrap().contains(rules, memo);
+                        memo.insert(b.to_string(), cnt);
+                        cnt
+                    }
+                }
+            })
+            .sum::<u32>()
+    }
 }
 
 fn parse_input(input: Lines) -> HashMap<String, Bag> {
@@ -111,7 +137,7 @@ dotted black bags contain no other bags.";
     }
 
     #[test]
-    fn test_contains() {
+    fn test_can_contain() {
         let parsed = parse_input(TEST1_INPUT.lines());
         let mut memo = HashMap::new();
         let res = parsed
@@ -119,5 +145,16 @@ dotted black bags contain no other bags.";
             .filter(|b| b.can_contain("shiny gold", &parsed, &mut memo))
             .count();
         assert_eq!(res, 4);
+    }
+
+    #[test]
+    fn test_contains() {
+        let parsed = parse_input(TEST1_INPUT.lines());
+        let mut memo = HashMap::new();
+        let res = parsed
+            .get("shiny gold")
+            .unwrap()
+            .contains(&parsed, &mut memo);
+        assert_eq!(res, 32);
     }
 }
