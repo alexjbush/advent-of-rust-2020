@@ -5,6 +5,7 @@ use day4::Day4;
 use day5::Day5;
 use day6::Day6;
 use day7::Day7;
+use day8::Day8;
 use std::time::Instant;
 
 pub mod day1;
@@ -14,6 +15,7 @@ pub mod day4;
 pub mod day5;
 pub mod day6;
 pub mod day7;
+pub mod day8;
 pub mod utils;
 
 pub trait Day<'a> {
@@ -30,6 +32,7 @@ fn get_days<'a>() -> Vec<&'a dyn Day<'a>> {
         &Day5 {},
         &Day6 {},
         &Day7 {},
+        &Day8 {},
     ]
 }
 
